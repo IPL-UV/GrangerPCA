@@ -1,0 +1,6 @@
+*.pdf
+*.tex
+*.Rhistory
+databases
+
+.Rproj.user
