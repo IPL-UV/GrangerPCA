@@ -74,46 +74,6 @@ gpca_eigen <- function(X, Y, maxlag = 1, lambda = 0,
   return(list(x = CC, rotation = rotation))
 }
 
-gpca2 <- function(X, Y, maxlag = 1, 
-                  center = TRUE, scale. = TRUE, 
-                  tol = NULL, rank. = NULL, intercept = FALSE){
-  
-  if (is.null(dim(Y))) Y <- matrix(data = Y, nrow = length(Y))
-  d <- ncol(X)
-  X <- scale(X, center = center, scale = scale.)
-  Xpast <- make_past(X, maxlag = maxlag)
-  if (intercept) Xpast <- cbind(Xpast, 1)
-  Ypast <- make_past(Y, maxlag = maxlag)
-  XYpast <- cbind(Xpast, Ypast)
-
-  qrres <- qr(XYpast)
-  Q2 <- qr.Q(qrres)[,(ncol(Xpast) + 1):ncol(XYpast)] 
-  Q3 <- qr.Q(qrres)[,-(ncol(XYpast):ncol(XYpast))]
-  
-  V <- Q3 %*% t(Q3)
-  W <- V + Q2 %*% t(Q2) 
-  X0 <- X[(maxlag+1):nrow(X), ]
-  
-  #A <- t(Q2) %*% X0
-
-  #B <- t(Q3) %*% X0
-  
-  #res <- geigen::gsvd(A, B)
-  
-  A <- t(X0) %*% t(W) %*% W %*% X0
-  B <- t(X0) %*% t(V) %*% V %*% X0
-  #res <- geigen::geigen(A, B, symmetric = TRUE)
-  
-  lambda <- 0.1
-  res <- eigen(solve(B + lambda*diag(ncol(B))) %*% A)
-  
-  #rotation <- d*res$Q %*% solve(geigen::gsvd.R(res))
-  rotation <- res$vectors   #[,ncol(rotation):1]
-  CC <- X %*% rotation
-  dimnames(rotation) <- list(colnames(X0), paste0("GPC", seq_len(ncol(rotation))))
-  return(list(x = CC, rotation = rotation))
-}
-
 
 tlopls <- function(X, Y, maxlag = 1, rank = 1, scaleC = 'center'){
   if (is.null(dim(Y))) Y <- matrix(data = Y, nrow = length(Y))
